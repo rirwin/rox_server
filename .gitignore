@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.coverage
+virtualenv_run/
+.tox/
+.*.swp
+.cache/

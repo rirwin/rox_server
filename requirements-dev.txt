@@ -1,0 +1,8 @@
+-r requirements.txt
+coverage
+flake8
+ipdb
+ipython
+mock==2.0.0
+pytest
+tox

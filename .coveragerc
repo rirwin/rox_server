@@ -1,0 +1,10 @@
+[report]
+exclude_lines =
+    if __name__ == .__main__.:
+omit =
+    .tox/*
+    tests/*,
+    virtualenv_run/*,
+    bin/*
+    *__init__.py
+
