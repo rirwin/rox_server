@@ -18,10 +18,5 @@ venv_update_does_not_work: requirements.txt requirements-dev.txt setup.py bin/ve
 run-docker: build
 	docker run -p 0.0.0.0:5000:5000 -i -t $(DOCKER_TAG) 
 
-test:
-	tox
-
-test-debug:
-	python -m pytest -s tests/
-
-
+test: build
+	docker run -i -t $(DOCKER_TAG) tox

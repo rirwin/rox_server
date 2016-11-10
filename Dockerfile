@@ -18,6 +18,7 @@ RUN     apt-get update && \
             python-pkg-resources \
             python-setuptools \
             python-virtualenv \
+            tox \
             # rocksdb dependencies
             zlib1g-dev \
             libbz2-dev \
