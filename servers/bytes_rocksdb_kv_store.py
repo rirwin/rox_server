@@ -1,12 +1,14 @@
 from flask import Flask
 from flask import request
+import rocksdb
+
 app = Flask(__name__)
 
 BAD_REQUEST = 'Bad Request'
 KEY_NOT_FOUND = 'Key Not Found'
 OK = 'Okay'
 
-db = {}
+db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))
 INSTRUCTIONS = """
 Welcome to KV server. To use:
 Visit endpoints to interact with store:
@@ -32,7 +34,7 @@ def set():
     try:
         key = request.args['key']
         value = request.args['value']
-        db[key] = value
+        db.put(key, value)
     except:
         return BAD_REQUEST, 400
     return OK, 200

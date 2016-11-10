@@ -19,6 +19,7 @@ RUN     apt-get update && \
             python-setuptools \
             python-virtualenv \
             tox \
+            vim \
             # rocksdb dependencies
             zlib1g-dev \
             libbz2-dev \
@@ -66,5 +67,5 @@ ENV     BASEPATH /code
 
 #USER    nobody
 
-CMD     python -m servers.string_kv_store
+CMD     python -m servers.bytes_rocksdb_kv_store
 EXPOSE  5000
