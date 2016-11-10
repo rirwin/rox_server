@@ -1,12 +1,54 @@
 FROM ubuntu:16.04
 
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y wget language-pack-en-base
+
+RUN locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales
+
 RUN     apt-get update && \
         DEBIAN_FRONTEND=noninteractive apt-get install \
             --yes \
+            build-essential \
+            libpq5 \
+            libpq-dev \
+            uuid-dev \
+            libsnappy-dev \
+            libffi-dev \
             python-pip \
             python-pkg-resources \
             python-setuptools \
-            python-virtualenv 
+            python-virtualenv \
+            # rocksdb dependencies
+            zlib1g-dev \
+            libbz2-dev \
+            libgflags-dev 
+            
+RUN mkdir /src
+
+WORKDIR /src
+
+# Grab v5.4.0 of pypy
+RUN wget https://bitbucket.org/pypy/pypy/downloads/pypy2-v5.4.0-linux64.tar.bz2 --no-check-certificate
+RUN bunzip2 pypy2-v5.4.0-linux64.tar.bz2
+RUN tar xvf pypy2-v5.4.0-linux64.tar
+
+ENV PATH $PATH:/src/pypy2-v5.4.0-linux64/bin/
+
+WORKDIR /
+
+# Grab latest rocks db release without the error encountered here
+# https://github.com/stephan-hof/pyrocksdb/issues/48 and build
+RUN wget https://github.com/facebook/rocksdb/archive/v4.6.1.tar.gz
+RUN tar -xvzf v4.6.1.tar.gz
+RUN ln -s /rocksdb-4.6.1 rocksdb
+
+RUN cd rocksdb && make shared_lib
+
+# Set up some environment variables for the compile
+ENV CPLUS_INCLUDE_PATH ${CPLUS_INCLUDE_PATH}:/rocksdb/include
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/rocksdb
+ENV LIBRARY_PATH ${LIBRARY_PATH}:/rocksdb
+
 
 ADD     requirements.txt /code/requirements.txt
 RUN     virtualenv --python=python2.7 /code/virtualenv_run
@@ -21,7 +63,7 @@ ENV     PATH=/code/virtualenv_run/bin:$PATH
 WORKDIR /code
 ENV     BASEPATH /code
 
-USER    nobody
+#USER    nobody
 
 CMD     python -m servers.string_kv_store
 EXPOSE  5000
