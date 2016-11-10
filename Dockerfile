@@ -53,7 +53,7 @@ ENV LIBRARY_PATH ${LIBRARY_PATH}:/rocksdb
 
 
 ADD     requirements.txt /code/requirements.txt
-RUN     virtualenv --python=python2.7 /code/virtualenv_run
+RUN     virtualenv --python=pypy /code/virtualenv_run
 RUN     /code/virtualenv_run/bin/pip install \
             --index-url=https://pypi.python.org/pypi \
             --requirement=/code/requirements.txt
@@ -67,5 +67,5 @@ ENV     BASEPATH /code
 
 #USER    nobody
 
-CMD     python -m servers.bytes_rocksdb_kv_store
+CMD     pypy -m servers.bytes_rocksdb_kv_store
 EXPOSE  5000
