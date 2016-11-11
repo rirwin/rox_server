@@ -5,13 +5,13 @@ build:
 	docker build -t $(DOCKER_TAG) .
 
 run-interactive: build
-	docker run -p 0.0.0.0:5000:5000 -v $(PWD)/servers:/code/servers:rw -v $(PWD)/tests:/code/tests:rw -i -t $(DOCKER_TAG) /bin/bash
+	docker run -p 0.0.0.0:80:80 -v $(PWD)/servers:/code/servers:rw -v $(PWD)/tests:/code/tests:rw -i -t $(DOCKER_TAG) /bin/bash
 
 clean:
 	rm -rf virtualenv_run/
 
 run-docker: build
-	docker run -p 0.0.0.0:5000:5000 -i -t $(DOCKER_TAG) 
+	docker run -p 0.0.0.0:80:80 -i -t $(DOCKER_TAG) 
 
 test: build
 	docker run -i -t $(DOCKER_TAG) tox

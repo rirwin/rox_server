@@ -65,7 +65,12 @@ ENV     PATH=/code/virtualenv_run/bin:$PATH
 WORKDIR /code
 ENV     BASEPATH /code
 
-#USER    nobody
+RUN     apt-get install -y apache2 libapache2-mod-wsgi
+ADD     rox_server.conf /etc/apache2/sites-available/rox_server.conf
+RUN     a2ensite rox_server
+RUN     /etc/init.d/apache2 restart
+
+# USER    nobody
 
 CMD     pypy -m servers.bytes_rocksdb_kv_store
 EXPOSE  5000
