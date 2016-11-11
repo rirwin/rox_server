@@ -19,6 +19,7 @@ RUN     apt-get update && \
             python-pkg-resources \
             python-setuptools \
             python-virtualenv \
+            nginx \
             tox \
             sudo \
             vim \
@@ -62,8 +63,22 @@ RUN     /code/virtualenv_run/bin/pip install \
             --index-url=https://pypi.python.org/pypi \
             --requirement=/code/requirements.txt
 
+RUN sudo mkdir /var/run/flask-uwsgi
+RUN sudo chown www-data:www-data /var/run/flask-uwsgi
+
+
+# Create a directory for the logs
+RUN sudo mkdir /var/log/flask-uwsgi
+RUN sudo chown www-data:www-data /var/log/flask-uwsgi
+
+# Create a directory for the configs
+RUN sudo mkdir /etc/flask-uwsgi
+ADD     flask-uwsgi.conf /etc/init/flask-uwsgi.conf
+
 ADD     serviceinit.d/rox_server /etc/init.d/rox_server
+ADD     serviceinit.d/flask-uwsgi /etc/init.d/flask-uwsgi
 RUN     chmod +x /etc/init.d/rox_server
+RUN     chmod +x /etc/init.d/flask-uwsgi
 
 ADD     . /code
 
@@ -76,3 +91,4 @@ ENV     BASEPATH /code
 
 CMD     uwsgi --http 0.0.0.0:5000 --home virtualenv_run --wsgi-file servers/bytes_rocksdb_kv_store.py --callable app --master --processes 4
 EXPOSE  5000
+EXPOSE  8000
