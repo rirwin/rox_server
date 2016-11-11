@@ -19,6 +19,7 @@ RUN     apt-get update && \
             python-setuptools \
             python-virtualenv \
             tox \
+            sudo \
             vim \
             # rocksdb dependencies
             zlib1g-dev \
@@ -58,6 +59,9 @@ RUN     /code/virtualenv_run/bin/pip install \
             --index-url=https://pypi.python.org/pypi \
             --requirement=/code/requirements.txt
 
+ADD     serviceinit.d/rox_server /etc/init.d/rox_server
+RUN     chmod +x /etc/init.d/rox_server
+
 ADD     . /code
 
 ENV     PATH=/code/virtualenv_run/bin:$PATH
@@ -65,7 +69,5 @@ ENV     PATH=/code/virtualenv_run/bin:$PATH
 WORKDIR /code
 ENV     BASEPATH /code
 
-#USER    nobody
-
-CMD     pypy -m servers.bytes_rocksdb_kv_store
+CMD     /etc/init.d/rox_server start ; sudo -u nobody tail -f /var/log/rox_server.err
 EXPOSE  5000
