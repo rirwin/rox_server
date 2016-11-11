@@ -9,6 +9,7 @@ KEY_NOT_FOUND = 'Key Not Found'
 OK = 'Okay'
 
 db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))
+
 INSTRUCTIONS = """
 Welcome to KV server. To use:
 Visit endpoints to interact with store:
