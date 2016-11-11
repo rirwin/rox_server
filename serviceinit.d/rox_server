@@ -11,7 +11,6 @@
 
 dir="/code/"
 cmd="pypy -m servers.bytes_rocksdb_kv_store"
-user="nobody"
 
 name=`basename $0`
 pid_file="/var/run/$name.pid"
@@ -33,11 +32,7 @@ case "$1" in
     else
         echo "Starting $name"
         cd "$dir"
-        if [ -z "$user" ]; then
-            $cmd >> "$stdout_log" 2>> "$stderr_log" &
-        else
-            $cmd >> "$stdout_log" 2>> "$stderr_log" &
-        fi
+        $cmd >> "$stdout_log" 2>> "$stderr_log" &
         echo $! > "$pid_file"
         if ! is_running; then
             echo "Unable to start, see $stdout_log and $stderr_log"
