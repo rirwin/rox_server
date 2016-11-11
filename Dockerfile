@@ -1,4 +1,5 @@
 FROM ubuntu:16.04
+MAINTAINER ryan.irwin.cpe@gmail.com
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y wget language-pack-en-base
@@ -21,6 +22,7 @@ RUN     apt-get update && \
             tox \
             sudo \
             vim \
+            git \
             # rocksdb dependencies
             zlib1g-dev \
             libbz2-dev \
@@ -52,9 +54,10 @@ ENV CPLUS_INCLUDE_PATH ${CPLUS_INCLUDE_PATH}:/rocksdb/include
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/rocksdb
 ENV LIBRARY_PATH ${LIBRARY_PATH}:/rocksdb
 
+RUN     pip install uWSGI==2.0.14
 
 ADD     requirements.txt /code/requirements.txt
-RUN     virtualenv --python=pypy /code/virtualenv_run
+RUN     virtualenv --python=python2.7 /code/virtualenv_run
 RUN     /code/virtualenv_run/bin/pip install \
             --index-url=https://pypi.python.org/pypi \
             --requirement=/code/requirements.txt
@@ -69,5 +72,7 @@ ENV     PATH=/code/virtualenv_run/bin:$PATH
 WORKDIR /code
 ENV     BASEPATH /code
 
-CMD     /etc/init.d/rox_server start ; sudo -u nobody tail -f /var/log/rox_server.err
+#USER    nobody
+
+CMD     uwsgi --http 0.0.0.0:5000 --home virtualenv_run --wsgi-file servers/bytes_rocksdb_kv_store.py --callable app --master --processes 4
 EXPOSE  5000
