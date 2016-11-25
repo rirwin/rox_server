@@ -24,7 +24,7 @@ run-docker-interactive: build
 test:
 	tox
 
-test-in-docker: build
+test-in-docker: clean build
 	docker run -i -t $(DOCKER_TAG) tox
 
 test-debug:
