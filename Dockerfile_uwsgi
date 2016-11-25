@@ -1,4 +1,5 @@
 FROM ubuntu:16.04
+MAINTAINER ryan.irwin.cpe@gmail.com
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y wget language-pack-en-base
@@ -21,6 +22,7 @@ RUN     apt-get update && \
             tox \
             sudo \
             vim \
+            git \
             # rocksdb dependencies
             zlib1g-dev \
             libbz2-dev \
@@ -30,19 +32,17 @@ RUN mkdir /src
 
 WORKDIR /src
 
-# Ubuntu does not have python3.4 but pyrocksdb needs 3.4 (not tested for 3.5)
-RUN wget https://www.python.org/ftp/python/3.4.5/Python-3.4.5.tgz --no-check-certificate
-RUN tar xzf Python-3.4.5.tgz
-WORKDIR /src/Python-3.4.5
-RUN ./configure
-RUN make altinstall
+# Grab v5.4.0 of pypy
+RUN wget https://bitbucket.org/pypy/pypy/downloads/pypy2-v5.4.0-linux64.tar.bz2 --no-check-certificate
+RUN bunzip2 pypy2-v5.4.0-linux64.tar.bz2
+RUN tar xvf pypy2-v5.4.0-linux64.tar
 
-ENV PATH $PATH:/src/Python-3.4.5/bin/
+ENV PATH $PATH:/src/pypy2-v5.4.0-linux64/bin/
+
+WORKDIR /
 
 # Grab latest rocks db release without the error encountered here
 # https://github.com/stephan-hof/pyrocksdb/issues/48 and build
-WORKDIR /
-
 RUN wget https://github.com/facebook/rocksdb/archive/v4.6.1.tar.gz
 RUN tar -xvzf v4.6.1.tar.gz
 RUN ln -s /rocksdb-4.6.1 rocksdb
@@ -54,18 +54,13 @@ ENV CPLUS_INCLUDE_PATH ${CPLUS_INCLUDE_PATH}:/rocksdb/include
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/rocksdb
 ENV LIBRARY_PATH ${LIBRARY_PATH}:/rocksdb
 
+RUN     pip install uWSGI==2.0.14
 
 ADD     requirements.txt /code/requirements.txt
-RUN     virtualenv --python=python3.4 /code/virtualenv_run
+RUN     virtualenv --python=python2.7 /code/virtualenv_run
 RUN     /code/virtualenv_run/bin/pip install \
             --index-url=https://pypi.python.org/pypi \
             --requirement=/code/requirements.txt
-
-# RocksDB has a lot of dependencies that will likely not run on the host machine (outside of Docker)
-# So it is left out of the requirements.txt file
-RUN     /code/virtualenv_run/bin/pip install \
-            --index-url=https://pypi.python.org/pypi \
-            pyrocksdb
 
 ADD     serviceinit.d/rox_server /etc/init.d/rox_server
 RUN     chmod +x /etc/init.d/rox_server
@@ -77,5 +72,7 @@ ENV     PATH=/code/virtualenv_run/bin:$PATH
 WORKDIR /code
 ENV     BASEPATH /code
 
-CMD     /etc/init.d/rox_server start ; sudo -u nobody tail -f /var/log/rox_server.err
+#USER    nobody
+
+CMD     uwsgi --http 0.0.0.0:5000 --home virtualenv_run --wsgi-file servers/bytes_rocksdb_kv_store.py --callable app --master --processes 4
 EXPOSE  5000

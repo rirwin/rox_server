@@ -32,7 +32,7 @@
 ### END INIT INFO
 
 dir="/code/"
-cmd="pypy -m servers.bytes_rocksdb_kv_store"
+cmd="python -m rox_server.server"
 
 name=`basename $0`
 pid_file="/var/run/$name.pid"
