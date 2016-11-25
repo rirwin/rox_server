@@ -1,14 +1,21 @@
 from flask import Flask
 from flask import request
-import rocksdb
+
+try:
+    import rocksdb
+    db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))  # pragma: no cover
+    print("Using RocksDB")                                                            # pragma: no cover
+except ImportError:
+    from rox_server.dict_database import DictDatabase
+    db = DictDatabase()
+    print("Using In-Memory Dictionary")
+
 
 app = Flask(__name__)
 
 BAD_REQUEST = 'Bad Request'
 KEY_NOT_FOUND = 'Key Not Found'
 OK = 'Okay'
-
-db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))
 
 INSTRUCTIONS = """
 Welcome to KV server. To use:
@@ -35,7 +42,7 @@ def set():
     try:
         key = request.args['key']
         value = request.args['value']
-        db.put(key, value)
+        db.put(str.encode(key), str.encode(value))
     except:
         return BAD_REQUEST, 400
     return OK, 200
@@ -44,7 +51,7 @@ def set():
 @app.route('/get', methods=['GET', 'POST'])
 def get():
     try:
-        key = request.args['key']
+        key = str.encode(request.args['key'])
     except:
         return BAD_REQUEST, 400
 

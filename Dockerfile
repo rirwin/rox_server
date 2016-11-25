@@ -30,6 +30,14 @@ RUN mkdir /src
 
 WORKDIR /src
 
+# Ubuntu does not have python3.4 but pyrocksdb needs 3.4 (not tested for 3.5)
+RUN wget https://www.python.org/ftp/python/3.4.5/Python-3.4.5.tgz --no-check-certificate
+RUN tar xzf Python-3.4.5.tgz
+WORKDIR /src/Python-3.4.5
+RUN ./configure
+RUN make altinstall
+
+ENV PATH $PATH:/src/Python-3.4.5/bin/
 
 # Grab latest rocks db release without the error encountered here
 # https://github.com/stephan-hof/pyrocksdb/issues/48 and build
@@ -57,7 +65,7 @@ RUN     /code/virtualenv_run/bin/pip install \
 # So it is left out of the requirements.txt file
 RUN     /code/virtualenv_run/bin/pip install \
             --index-url=https://pypi.python.org/pypi \
-            pyrocksdb==0.4
+            pyrocksdb
 
 ADD     serviceinit.d/rox_server /etc/init.d/rox_server
 RUN     chmod +x /etc/init.d/rox_server
