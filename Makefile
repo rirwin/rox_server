@@ -9,6 +9,7 @@ run-interactive: build
 
 clean:
 	rm -rf virtualenv_run/
+	find . | grep "__pycache__" | xargs rm -rf
 
 run-docker: build
 	docker run -p 0.0.0.0:5000:5000 -i -t $(DOCKER_TAG) 
