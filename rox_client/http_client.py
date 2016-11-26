@@ -19,7 +19,7 @@ def assert_key_is_hashable(func):
     return wrapped_func
 
 
-class RoxClient(object):
+class RoxHttpClient(object):
 
     conn = HTTPConnection('0.0.0.0:5000')
 

@@ -16,7 +16,7 @@ run-docker: build
 	docker run -p 0.0.0.0:5000:5000 -i -t $(DOCKER_TAG) 
 
 run-local:
-	python -m rox_server.server
+	python -m rox_server.http_server
 
 run-docker-interactive: build 
 	docker run -p 0.0.0.0:5000:5000 -v $(PWD)/rox_server:/code/rox_server:rw -v $(PWD)/tests:/code/tests:rw -i -t $(DOCKER_TAG) /bin/bash

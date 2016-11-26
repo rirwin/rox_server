@@ -1,7 +1,7 @@
 import pytest
 
-from rox_server.server import app
-from rox_server.server import db
+from rox_server.http_server import app
+from rox_server.http_server import db
 
 
 app.testing = True

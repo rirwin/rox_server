@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import request
 
+
 try:
     import rocksdb
     db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))  # pragma: no cover
