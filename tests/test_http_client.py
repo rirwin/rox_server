@@ -9,9 +9,10 @@ from rox_client.http_client import RoxHttpClient
 class TestClient(object):
 
     def test_client_init_opens_http_connection(self):
-        client = RoxHttpClient()
-        assert client.conn.host == '0.0.0.0'
+        client = RoxHttpClient(host='1.2.3.4', port=5000, cache_size_limit=50)
+        assert client.conn.host == '1.2.3.4'
         assert client.conn.port == 5000
+        assert client.cache_size_limit == 50
 
     @pytest.mark.parametrize(
         'key, value',
