@@ -61,3 +61,19 @@ class TestClient(object):
             ]
             patch_conn.request.call_args_list == expected_call_args
             assert returned_value == value
+
+    def test_set_bulk_calls_request_set_endpoint_properly(self):
+        client = RoxHttpClient()
+        data = {'key_{}'.format(i): 'value_{}'.format(i) for i in range(10)}
+        with mock.patch.object(client, 'conn') as patch_conn:
+            client.set_bulk(data)
+            expected_call_args = [
+                mock.call(
+                    'POST',
+                    '/set',
+                    simplejson.dumps(data),
+                    JSON_HEADERS
+                )
+            ]
+            patch_conn.request.call_args_list == expected_call_args
+
