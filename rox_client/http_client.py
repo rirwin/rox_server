@@ -1,44 +1,38 @@
 from http.client import HTTPConnection
 import simplejson
-import urllib.parse
 
 
-class KeyIsNotHashableException(Exception):
-    pass
-
-
-def assert_key_is_hashable(func):
-
-    def wrapped_func(key, *args):
-        try:
-            {key: None}
-        except:
-            raise KeyIsNotHashableException()
-        return func(key, *args)
-
-    return wrapped_func
+JSON_HEADERS = {'Content-type': 'application/json'}
 
 
 class RoxHttpClient(object):
 
     conn = HTTPConnection('0.0.0.0:5000')
 
-    @assert_key_is_hashable
     def set(self, key, value):
         self.conn.request(
-            "POST", "/set?key={key}&value={value}".format(
-                key=urllib.parse.quote(simplejson.dumps(key)),
-                value=urllib.parse.quote(simplejson.dumps(value))
-            )
+            'POST',
+            '/set',
+            simplejson.dumps({key: value}),
+            JSON_HEADERS
         )
         self.conn.getresponse()
 
-    @assert_key_is_hashable
+    def set_bulk(self, data):
+        self.conn.request(
+            'POST',
+            '/set',
+            simplejson.dumps(data),
+            JSON_HEADERS
+        )
+        self.conn.getresponse()
+
     def get(self, key):
         self.conn.request(
-            "GET", "/get?key={key}".format(
-                key=urllib.parse.quote(simplejson.dumps(key))
-            )
+            'GET',
+            '/get',
+            simplejson.dumps(key),
+            JSON_HEADERS
         )
         resp = self.conn.getresponse()
-        return simplejson.loads(resp.read())
+        return resp.read().decode()

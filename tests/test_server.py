@@ -1,4 +1,5 @@
 import pytest
+import simplejson
 
 from rox_server.http_server import app
 from rox_server.http_server import db
@@ -18,18 +19,9 @@ class TestServerRouteBehavior(object):
         assert response.status_code == 200
         assert b'Welcome to KV server.' in response.get_data()
 
-    def test_set_places_object_in_db(self, client):
-        response = client.get('set?key=5&value=2')
-        assert response.status_code == 200
-        assert db.get(b'5') == b'2'
-
-    def test_set_key_with_no_value_returns_bad_request(self, client):
-        response = client.get('set?key=5')
-        assert response.status_code == 400
-
     def test_get_retrieves_object_from_db(self, client):
         db.put(b'5', b'1')
-        response = client.get('get?key=5')
+        response = client.get('get', data=simplejson.dumps('5'), content_type='application/json')
         assert response.status_code == 200
         assert db.get(b'5') == b'1'
 
@@ -38,5 +30,22 @@ class TestServerRouteBehavior(object):
         assert response.status_code == 400
 
     def test_get_with_no_value_in_db_returns_not_found(self, client):
-        response = client.get('get?key=123456')
+        response = client.get('get', data=simplejson.dumps('abcd'), content_type='application/json')
         assert response.status_code == 404
+
+    def test_set_places_object_in_db_as_byte_string(self, client):
+        data = {'key_0': 'value_0'}
+        response = client.get('set', data=simplejson.dumps(data), content_type='application/json')
+        assert response.status_code == 200
+        assert db.get(str.encode('key_0')) == str.encode('value_0')
+
+    def test_set_bulk_places_all_objects_in_db_as_byte_strings(self, client):
+        data = {'key_%d' % i: 'value_%d' % i for i in range(10)}
+        response = client.get('set', data=simplejson.dumps(data), content_type='application/json')
+        assert response.status_code == 200
+        for k, v in data.items():
+            assert db.get(str.encode(k)) == str.encode(v)
+
+    def test_set_not_json_returns_bad_request(self, client):
+        response = client.get('set?blah')
+        assert response.status_code == 400

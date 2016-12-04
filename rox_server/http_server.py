@@ -19,17 +19,7 @@ KEY_NOT_FOUND = 'Key Not Found'
 OK = 'Okay'
 
 INSTRUCTIONS = """
-Welcome to KV server. To use:
-Visit endpoints to interact with store:
-/set?key=5&value=2
-
-to set 5 to 2
-
-/get?key=5
-
-to retrieve key for 5
-
-All types are strings
+Welcome to KV server.
 """
 
 
@@ -41,9 +31,9 @@ def index():
 @app.route('/set', methods=['GET', 'POST'])
 def set():
     try:
-        key = request.args['key']
-        value = request.args['value']
-        db.put(str.encode(key), str.encode(value))
+        data = request.get_json()
+        for k, v in data.items():
+            db.put(str.encode(k), str.encode(v))
     except:
         return BAD_REQUEST, 400
     return OK, 200
@@ -52,11 +42,12 @@ def set():
 @app.route('/get', methods=['GET', 'POST'])
 def get():
     try:
-        key = str.encode(request.args['key'])
+        key = request.get_json()
+        encoded_key = str.encode(key)
     except:
         return BAD_REQUEST, 400
 
-    value = db.get(key)
+    value = db.get(encoded_key)
     if value:
         return value, 200
     return KEY_NOT_FOUND, 404
