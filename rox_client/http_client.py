@@ -7,9 +7,14 @@ JSON_HEADERS = {'Content-type': 'application/json'}
 
 class RoxHttpClient(object):
 
-    conn = HTTPConnection('0.0.0.0:5000')
-    cache_size_limit = 8
-    _cache = {}
+    conn = None
+    cache_size_limit = None
+    _cache = None
+
+    def __init__(self, host='0.0.0.0', port=5000, cache_size_limit=8):
+        self.conn = HTTPConnection('{}:{}'.format(host, port))
+        self.cache_size_limit = cache_size_limit
+        self._cache = {}
 
     def set(self, key, value):
         self.conn.request(
