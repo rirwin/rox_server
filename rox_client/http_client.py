@@ -8,6 +8,8 @@ JSON_HEADERS = {'Content-type': 'application/json'}
 class RoxHttpClient(object):
 
     conn = HTTPConnection('0.0.0.0:5000')
+    cache_size_limit = 8
+    _cache = {}
 
     def set(self, key, value):
         self.conn.request(
@@ -26,6 +28,18 @@ class RoxHttpClient(object):
             JSON_HEADERS
         )
         self.conn.getresponse()
+
+    def set_cached(self, key, value):
+        self._cache[key] = value
+        if len(self._cache) >= self.cache_size_limit:
+            self.conn.request(
+                'POST',
+                '/set_bulk',
+                simplejson.dumps(self._cache),
+                JSON_HEADERS
+            )
+            self.conn.getresponse()
+            self._cache = {}
 
     def get(self, key):
         self.conn.request(
