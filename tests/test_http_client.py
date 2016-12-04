@@ -76,4 +76,3 @@ class TestClient(object):
                 )
             ]
             patch_conn.request.call_args_list == expected_call_args
-
