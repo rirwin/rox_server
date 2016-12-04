@@ -5,8 +5,8 @@ build:
 	docker build -t $(DOCKER_TAG) .
 
 clean:
-	rm -rf virtualenv_run/
-	find . | grep "__pycache__" | xargs rm -rf
+	find rox_* | grep "__pycache__" | xargs rm -rf
+	find rox_* | grep ".pyc" | xargs rm -rf
 
 dev-venv: requirements.txt requirements-dev.txt
 	virtualenv --python python3.5 virtualenv_run

@@ -1,10 +1,8 @@
 import mock
-from simplejson import dumps
+import simplejson
 import pytest
-from urllib.parse import quote
 
-from rox_client.http_client import assert_key_is_hashable
-from rox_client.http_client import KeyIsNotHashableException
+from rox_client.http_client import JSON_HEADERS
 from rox_client.http_client import RoxHttpClient
 
 
@@ -29,7 +27,9 @@ class TestClient(object):
             expected_call_args = [
                 mock.call(
                     'POST',
-                    '/set?key={}&value={}'.format(quote(dumps(key)), quote(dumps(value)))
+                    '/set',
+                    simplejson.dumps({key: value}),
+                    JSON_HEADERS
                 )
             ]
             patch_conn.request.call_args_list == expected_call_args
@@ -45,35 +45,19 @@ class TestClient(object):
         client = RoxHttpClient()
         mock_conn = mock.Mock()
         mock_response = mock.Mock()
-        mock_response.read = mock.Mock(return_value=dumps(value))
+        mock_decode = mock.Mock()
+        mock_decode.decode = mock.Mock(return_value=value)
+        mock_response.read = mock.Mock(return_value=mock_decode)
         mock_conn.getresponse = mock.Mock(return_value=mock_response)
         with mock.patch.object(client, 'conn', mock_conn) as patch_conn:
             returned_value = client.get(key)
             expected_call_args = [
                 mock.call(
                     'GET',
-                    '/get?key={}'.format(quote(dumps(key)))
+                    '/get',
+                    simplejson.dumps(key),
+                    JSON_HEADERS
                 )
             ]
             patch_conn.request.call_args_list == expected_call_args
             assert returned_value == value
-
-    @pytest.mark.parametrize(
-        'key, exception',
-        [
-            ('1.2.3.4', None),
-            ({'a': 'b'}, KeyIsNotHashableException),
-            (['a', 'b', 'c'], KeyIsNotHashableException),
-        ]
-    )
-    def test_key_must_be_serializable_check(self, key, exception):
-
-        @assert_key_is_hashable
-        def do_nothing(key):
-            pass
-
-        if exception:
-            with pytest.raises(exception):
-                do_nothing(key)
-        else:
-            do_nothing(key)
