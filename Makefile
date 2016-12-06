@@ -5,8 +5,11 @@ build:
 	docker build -t $(DOCKER_TAG) .
 
 clean:
-	find rox_* | grep "__pycache__" | xargs rm -rf
-	find rox_* | grep ".pyc" | xargs rm -rf
+	find client | grep "__pycache__" | xargs rm -rf
+	find server | grep "__pycache__" | xargs rm -rf
+	find client | grep ".pyc" | xargs rm -rf
+	find server | grep ".pyc" | xargs rm -rf
+
 
 dev-venv: requirements.txt requirements-dev.txt
 	virtualenv --python python3.5 virtualenv_run
@@ -16,10 +19,10 @@ run-docker: build
 	docker run -p 0.0.0.0:5000:5000 -i -t $(DOCKER_TAG) 
 
 run-local:
-	python -m rox_server.http_server
+	python -m server.http_server
 
 run-docker-interactive: build 
-	docker run -p 0.0.0.0:5000:5000 -v $(PWD)/rox_server:/code/rox_server:rw -v $(PWD)/tests:/code/tests:rw -i -t $(DOCKER_TAG) /bin/bash
+	docker run -p 0.0.0.0:5000:5000 -v $(PWD)/server:/code/rox_server:rw -v $(PWD)/tests:/code/tests:rw -i -t $(DOCKER_TAG) /bin/bash
 
 test:
 	tox

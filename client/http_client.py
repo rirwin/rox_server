@@ -37,13 +37,7 @@ class RoxHttpClient(object):
     def set_cached(self, key, value):
         self._cache[key] = value
         if len(self._cache) >= self.cache_size_limit:
-            self.conn.request(
-                'POST',
-                '/set_bulk',
-                simplejson.dumps(self._cache),
-                JSON_HEADERS
-            )
-            self.conn.getresponse()
+            self.set_bulk(self._cache)
             self._cache = {}
 
     def get(self, key):
@@ -55,3 +49,6 @@ class RoxHttpClient(object):
         )
         resp = self.conn.getresponse()
         return resp.read().decode()
+
+    def flush(self):
+        return self.set_bulk(self._cache)

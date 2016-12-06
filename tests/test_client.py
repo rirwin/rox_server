@@ -2,8 +2,8 @@ import mock
 import simplejson
 import pytest
 
-from rox_client.http_client import JSON_HEADERS
-from rox_client.http_client import RoxHttpClient
+from client.http_client import JSON_HEADERS
+from client.http_client import RoxHttpClient
 
 
 class TestClient(object):
@@ -60,7 +60,7 @@ class TestClient(object):
             expected_call_args = [
                 mock.call(
                     'POST',
-                    '/set_bulk',
+                    '/set',
                     simplejson.dumps({i[0]: i[1] for i in data[:client.cache_size_limit]}),
                     JSON_HEADERS
                 )
@@ -95,3 +95,11 @@ class TestClient(object):
             ]
             assert patch_conn.request.call_args_list == expected_call_args
             assert returned_value == value
+
+    def test_flush_calls_set_bulk_with_cache(self):
+        client = RoxHttpClient()
+        cache = {'a': 'b'}
+        client._cache = cache
+        with mock.patch.object(client, 'set_bulk') as patch_set_bulk:
+            client.flush()
+            assert patch_set_bulk.call_args_list == [mock.call(cache)]

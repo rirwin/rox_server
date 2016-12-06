@@ -1,8 +1,8 @@
 import pytest
 import simplejson
 
-from rox_server.http_server import app
-from rox_server.http_server import db
+from server.http_server import app
+from server.http_server import db
 
 
 app.testing = True
