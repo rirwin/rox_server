@@ -101,5 +101,5 @@ class TestClient(object):
         cache = {'a': 'b'}
         client._cache = cache
         with mock.patch.object(client, 'set_bulk') as patch_set_bulk:
-            import ipdb;ipdb.set_trace()
+            client.flush()
             assert patch_set_bulk.call_args_list == [mock.call(cache)]
