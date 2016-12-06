@@ -55,3 +55,6 @@ class RoxHttpClient(object):
         )
         resp = self.conn.getresponse()
         return resp.read().decode()
+
+    def flush(self):
+        return self.set_bulk(self._cache)
