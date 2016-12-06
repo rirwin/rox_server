@@ -60,7 +60,7 @@ class TestClient(object):
             expected_call_args = [
                 mock.call(
                     'POST',
-                    '/set_bulk',
+                    '/set',
                     simplejson.dumps({i[0]: i[1] for i in data[:client.cache_size_limit]}),
                     JSON_HEADERS
                 )

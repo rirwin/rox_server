@@ -32,7 +32,7 @@
 ### END INIT INFO
 
 dir="/code/"
-cmd="python -m rox_server.http_server"
+cmd="python -m server.http_server"
 
 name=`basename $0`
 pid_file="/var/run/$name.pid"
