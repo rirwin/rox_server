@@ -2,8 +2,8 @@ import mock
 import simplejson
 import pytest
 
-from rox_client.http_client import JSON_HEADERS
-from rox_client.http_client import RoxHttpClient
+from client.http_client import JSON_HEADERS
+from client.http_client import RoxHttpClient
 
 
 class TestClient(object):
