@@ -103,3 +103,31 @@ class TestClient(object):
         with mock.patch.object(client, 'set_bulk') as patch_set_bulk:
             client.flush()
             assert patch_set_bulk.call_args_list == [mock.call(cache)]
+
+    def test_clear_key(self):
+        client = RoxHttpClient()
+        key = 'key1'
+        with mock.patch.object(client, 'conn') as patch_conn:
+            client.clear_key(key)
+            expected_call_args = [
+                mock.call(
+                    'POST',
+                    '/clear_key',
+                    simplejson.dumps(key),
+                    JSON_HEADERS
+                )
+            ]
+            assert patch_conn.request.call_args_list == expected_call_args
+            
+    def test_clear_all(self):
+        client = RoxHttpClient()
+        with mock.patch.object(client, 'conn') as patch_conn:
+            client.clear_all()
+            expected_call_args = [
+                mock.call(
+                    'POST',
+                    '/clear_all',
+                    JSON_HEADERS
+                )
+            ]
+            assert patch_conn.request.call_args_list == expected_call_args
