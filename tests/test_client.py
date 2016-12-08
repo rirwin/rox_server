@@ -8,6 +8,10 @@ from client.http_client import RoxHttpClient
 
 class TestClient(object):
 
+    @pytest.fixture
+    def client(self):
+        return RoxHttpClient()
+
     def test_client_init_opens_http_connection(self):
         client = RoxHttpClient(host='1.2.3.4', port=5000, cache_size_limit=50)
         assert client.conn.host == '1.2.3.4'
@@ -21,8 +25,7 @@ class TestClient(object):
             ('1.2.3.4', {'attr1': 1, 'attr2': True, 'attr3': 0.75})
         ]
     )
-    def test_set_calls_set_endpoint_properly(self, key, value):
-        client = RoxHttpClient()
+    def test_set_calls_set_endpoint_properly(self, client, key, value):
         with mock.patch.object(client, 'conn') as patch_conn:
             client.set(key, value)
             expected_call_args = [
@@ -35,8 +38,7 @@ class TestClient(object):
             ]
             assert patch_conn.request.call_args_list == expected_call_args
 
-    def test_set_bulk_calls_set_endpoint_properly(self):
-        client = RoxHttpClient()
+    def test_set_bulk_calls_set_endpoint_properly(self, client):
         data = {'key_{}'.format(i): 'value_{}'.format(i) for i in range(10)}
         with mock.patch.object(client, 'conn') as patch_conn:
             client.set_bulk(data)
@@ -50,8 +52,7 @@ class TestClient(object):
             ]
             assert patch_conn.request.call_args_list == expected_call_args
 
-    def test_set_cached_calls_set_bulk_endpoint_after_limit(self):
-        client = RoxHttpClient()
+    def test_set_cached_calls_set_bulk_endpoint_after_limit(self, client):
         data = [('key_{}'.format(i), 'value_{}'.format(i)) for i in range(10)]
         with mock.patch.object(client, 'conn') as patch_conn:
             for k, v in data:
@@ -75,8 +76,7 @@ class TestClient(object):
             ('1.2.3.4', {'attr1': 1, 'attr2': True, 'attr3': 0.75})
         ]
     )
-    def test_get_calls_get_endpoint_properly(self, key, value):
-        client = RoxHttpClient()
+    def test_get_calls_get_endpoint_properly(self, key, value, client):
         mock_conn = mock.Mock()
         mock_response = mock.Mock()
         mock_decode = mock.Mock()
@@ -96,16 +96,14 @@ class TestClient(object):
             assert patch_conn.request.call_args_list == expected_call_args
             assert returned_value == value
 
-    def test_flush_calls_set_bulk_with_cache(self):
-        client = RoxHttpClient()
+    def test_flush_calls_set_bulk_with_cache(self, client):
         cache = {'a': 'b'}
         client._cache = cache
         with mock.patch.object(client, 'set_bulk') as patch_set_bulk:
             client.flush()
             assert patch_set_bulk.call_args_list == [mock.call(cache)]
 
-    def test_clear_key(self):
-        client = RoxHttpClient()
+    def test_clear_key(self, client):
         key = 'key1'
         with mock.patch.object(client, 'conn') as patch_conn:
             client.clear_key(key)
@@ -119,8 +117,7 @@ class TestClient(object):
             ]
             assert patch_conn.request.call_args_list == expected_call_args
             
-    def test_clear_all(self):
-        client = RoxHttpClient()
+    def test_clear_all(self, client):
         with mock.patch.object(client, 'conn') as patch_conn:
             client.clear_all()
             expected_call_args = [
