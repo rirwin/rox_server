@@ -10,3 +10,6 @@ class DictDatabase(object):
 
     def get(self, key):
         return self._db.get(key)
+
+    def delete(self, key):
+        del self._db[key]

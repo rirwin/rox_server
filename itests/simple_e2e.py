@@ -3,6 +3,11 @@ from client.http_client import RoxHttpClient
 
 client = RoxHttpClient(host='192.168.99.100', port=5000, cache_size_limit=8)
 
+# Clears keys from previous run if exists
+keys = ['key{}'.format(i)for i in range(1, 25)]
+for k in keys:
+    client.clear_key(k)
+
 client.set('key1', 'value1')
 assert client.get('key1') == 'value1'
 

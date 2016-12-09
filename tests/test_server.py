@@ -49,3 +49,11 @@ class TestServerRouteBehavior(object):
     def test_set_not_json_returns_bad_request(self, client):
         response = client.get('set?blah')
         assert response.status_code == 400
+
+    def test_clear_clears_keys_in_db(self, client):
+        db.put(b'5', b'1')
+        db.put(b'7', b'2')
+        response = client.get('clear', data=simplejson.dumps([b'5', b'7']), content_type='application/json')
+        assert response.status_code == 200
+        assert db.get(b'5') == None
+        assert db.get(b'7') == None

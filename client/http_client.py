@@ -52,3 +52,21 @@ class RoxHttpClient(object):
 
     def flush(self):
         return self.set_bulk(self._cache)
+
+    def clear(self, key):
+        self.conn.request(
+            'POST',
+            '/clear',
+            simplejson.dumps([key]),
+            JSON_HEADERS
+        )
+        self.conn.getresponse()
+
+    def clear_bulk(self, keys):
+        self.conn.request(
+            'POST',
+            '/clear',
+            simplejson.dumps(keys),
+            JSON_HEADERS
+        )
+        self.conn.getresponse()

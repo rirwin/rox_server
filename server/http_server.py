@@ -53,5 +53,17 @@ def get():
     return KEY_NOT_FOUND, 404
 
 
+@app.route('/clear', methods=['GET', 'POST'])
+def clear():
+    try:
+        keys = request.get_json()
+        for key in keys:
+            encoded_key = str.encode(key)
+            db.delete(encoded_key)
+        return OK, 200
+    except:
+        return BAD_REQUEST, 400
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0')
