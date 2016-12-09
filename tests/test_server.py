@@ -55,5 +55,5 @@ class TestServerRouteBehavior(object):
         db.put(b'7', b'2')
         response = client.get('clear', data=simplejson.dumps([b'5', b'7']), content_type='application/json')
         assert response.status_code == 200
-        assert db.get(b'5') == None
-        assert db.get(b'7') == None
+        assert db.get(b'5') is None
+        assert db.get(b'7') is None
