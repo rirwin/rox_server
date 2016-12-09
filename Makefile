@@ -24,6 +24,9 @@ run-local:
 run-docker-interactive: build 
 	docker run -p 0.0.0.0:5000:5000 -v $(PWD)/server:/code/rox_server:rw -v $(PWD)/tests:/code/tests:rw -i -t $(DOCKER_TAG) /bin/bash
 
+itest:
+	python -m itests.simple_e2e
+
 test:
 	tox
 
