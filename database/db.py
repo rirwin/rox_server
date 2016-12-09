@@ -1,7 +1,7 @@
 try:
-    import rocksdb
-    db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))  # pragma: no cover
-    print("Using RocksDB")                                                            # pragma: no cover
+    from database.rocksdb_database import RocksDB
+    db = RocksDB()
+    print("Using RocksDB")
 except ImportError:
     from database.dict_database import DictDatabase
     db = DictDatabase()

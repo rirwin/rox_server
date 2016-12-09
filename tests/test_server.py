@@ -20,10 +20,10 @@ class TestServerRouteBehavior(object):
         assert b'Welcome to KV server.' in response.get_data()
 
     def test_get_retrieves_object_from_db(self, client):
-        db.put(b'5', b'1')
+        db.put('5', '1')
         response = client.get('get', data=simplejson.dumps('5'), content_type='application/json')
         assert response.status_code == 200
-        assert db.get(b'5') == b'1'
+        assert db.get('5') == '1'
 
     def test_get_with_no_key_returns_bad_request(self, client):
         response = client.get('get?')
@@ -37,26 +37,26 @@ class TestServerRouteBehavior(object):
         data = {'key_0': 'value_0'}
         response = client.get('set', data=simplejson.dumps(data), content_type='application/json')
         assert response.status_code == 200
-        assert db.get(str.encode('key_0')) == str.encode('value_0')
+        assert db.get('key_0') == 'value_0'
 
     def test_set_bulk_places_all_objects_in_db_as_byte_strings(self, client):
         data = {'key_%d' % i: 'value_%d' % i for i in range(10)}
         response = client.get('set', data=simplejson.dumps(data), content_type='application/json')
         assert response.status_code == 200
         for k, v in data.items():
-            assert db.get(str.encode(k)) == str.encode(v)
+            assert db.get(k) == v
 
     def test_set_not_json_returns_bad_request(self, client):
         response = client.get('set?blah')
         assert response.status_code == 400
 
     def test_clear_clears_keys_in_db(self, client):
-        db.put(b'5', b'1')
-        db.put(b'7', b'2')
-        response = client.get('clear', data=simplejson.dumps([b'5', b'7']), content_type='application/json')
+        db.put('5', '1')
+        db.put('7', '2')
+        response = client.get('clear', data=simplejson.dumps(['5', '7']), content_type='application/json')
         assert response.status_code == 200
-        assert db.get(b'5') is None
-        assert db.get(b'7') is None
+        assert db.get('5') is None
+        assert db.get('7') is None
 
     def test_clear_with_no_key_returns_bad_request(self, client):
         response = client.get('clear?')

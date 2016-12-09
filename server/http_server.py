@@ -25,7 +25,7 @@ def set():
     try:
         data = request.get_json()
         for k, v in data.items():
-            db.put(str.encode(k), str.encode(v))
+            db.put(k, v)
     except:
         return BAD_REQUEST, 400
     return OK, 200
@@ -35,11 +35,10 @@ def set():
 def get():
     try:
         key = request.get_json()
-        encoded_key = str.encode(key)
+        value = db.get(key)
     except:
         return BAD_REQUEST, 400
 
-    value = db.get(encoded_key)
     if value:
         return value, 200
     return KEY_NOT_FOUND, 404
@@ -50,8 +49,7 @@ def clear():
     try:
         keys = request.get_json()
         for key in keys:
-            encoded_key = str.encode(key)
-            db.delete(encoded_key)
+            db.delete(key)
         return OK, 200
     except:
         return BAD_REQUEST, 400
