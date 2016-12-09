@@ -1,15 +1,7 @@
 from flask import Flask
 from flask import request
 
-
-try:
-    import rocksdb
-    db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))  # pragma: no cover
-    print("Using RocksDB")                                                            # pragma: no cover
-except ImportError:
-    from server.dict_database import DictDatabase
-    db = DictDatabase()
-    print("Using In-Memory Dictionary")
+from database.db import db
 
 
 app = Flask(__name__)
