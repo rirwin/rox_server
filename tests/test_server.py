@@ -1,3 +1,4 @@
+import mock
 import pytest
 import simplejson
 
@@ -20,43 +21,37 @@ class TestServerRouteBehavior(object):
         assert b'Welcome to KV server.' in response.get_data()
 
     def test_get_retrieves_object_from_db(self, client):
-        db.put('5', '1')
-        response = client.get('get', data=simplejson.dumps('5'), content_type='application/json')
-        assert response.status_code == 200
-        assert db.get('5') == '1'
+        with mock.patch.object(db, 'get', return_value='1'):
+            response = client.get('get', data=simplejson.dumps('5'), content_type='application/json')
+            assert response.status_code == 200
+            assert response.data == b'1'
 
     def test_get_with_no_key_returns_bad_request(self, client):
         response = client.get('get?')
         assert response.status_code == 400
 
     def test_get_with_no_value_in_db_returns_not_found(self, client):
-        response = client.get('get', data=simplejson.dumps('abcd'), content_type='application/json')
-        assert response.status_code == 404
+        with mock.patch.object(db, 'get', return_value=None):
+            response = client.get('get', data=simplejson.dumps('abcd'), content_type='application/json')
+            assert response.status_code == 404
 
-    def test_set_places_object_in_db_as_byte_string(self, client):
-        data = {'key_0': 'value_0'}
-        response = client.get('set', data=simplejson.dumps(data), content_type='application/json')
-        assert response.status_code == 200
-        assert db.get('key_0') == 'value_0'
-
-    def test_set_bulk_places_all_objects_in_db_as_byte_strings(self, client):
-        data = {'key_%d' % i: 'value_%d' % i for i in range(10)}
-        response = client.get('set', data=simplejson.dumps(data), content_type='application/json')
-        assert response.status_code == 200
-        for k, v in data.items():
-            assert db.get(k) == v
+    def test_set_calls_put_to_db(self, client):
+        data = {'key_0': 'value_0', 'key_1': 'value_1'}
+        with mock.patch.object(db, 'put') as patch_put:
+            response = client.get('set', data=simplejson.dumps(data), content_type='application/json')
+            assert response.status_code == 200
+            assert patch_put.call_args_list == [mock.call(data)]
 
     def test_set_not_json_returns_bad_request(self, client):
         response = client.get('set?blah')
         assert response.status_code == 400
 
-    def test_clear_clears_keys_in_db(self, client):
-        db.put('5', '1')
-        db.put('7', '2')
-        response = client.get('clear', data=simplejson.dumps(['5', '7']), content_type='application/json')
-        assert response.status_code == 200
-        assert db.get('5') is None
-        assert db.get('7') is None
+    def test_clear_calls_delete_in_db(self, client):
+        keys = ['key_1', 'key_5']
+        with mock.patch.object(db, 'delete') as patch_delete:
+            response = client.get('clear', data=simplejson.dumps(keys), content_type='application/json')
+            assert response.status_code == 200
+            assert patch_delete.call_args_list == [mock.call(keys)]
 
     def test_clear_with_no_key_returns_bad_request(self, client):
         response = client.get('clear?')

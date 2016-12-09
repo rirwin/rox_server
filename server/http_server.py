@@ -24,8 +24,9 @@ def index():
 def set():
     try:
         data = request.get_json()
-        for k, v in data.items():
-            db.put(k, v)
+        if not data:
+            raise Exception
+        db.put(data)
     except:
         return BAD_REQUEST, 400
     return OK, 200
@@ -35,6 +36,8 @@ def set():
 def get():
     try:
         key = request.get_json()
+        if not key:
+            raise Exception
         value = db.get(key)
     except:
         return BAD_REQUEST, 400
@@ -48,8 +51,9 @@ def get():
 def clear():
     try:
         keys = request.get_json()
-        for key in keys:
-            db.delete(key)
+        if not keys:
+            raise Exception
+        db.delete(keys)
         return OK, 200
     except:
         return BAD_REQUEST, 400
