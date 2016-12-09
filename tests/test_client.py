@@ -103,27 +103,29 @@ class TestClient(object):
             client.flush()
             assert patch_set_bulk.call_args_list == [mock.call(cache)]
 
-    def test_clear_key(self, client):
+    def test_clear_calls_clear_endpoint_properly(self, client):
         key = 'key1'
         with mock.patch.object(client, 'conn') as patch_conn:
-            client.clear_key(key)
+            client.clear(key)
             expected_call_args = [
                 mock.call(
                     'POST',
-                    '/clear_key',
-                    simplejson.dumps(key),
+                    '/clear',
+                    simplejson.dumps([key]),
                     JSON_HEADERS
                 )
             ]
             assert patch_conn.request.call_args_list == expected_call_args
-            
-    def test_clear_all(self, client):
+
+    def test_clear_bulk_calls_clear_endpoint_properly(self, client):
+        keys = ['key1', 'key2']
         with mock.patch.object(client, 'conn') as patch_conn:
-            client.clear_all()
+            client.clear_bulk(keys)
             expected_call_args = [
                 mock.call(
                     'POST',
-                    '/clear_all',
+                    '/clear',
+                    simplejson.dumps(keys),
                     JSON_HEADERS
                 )
             ]

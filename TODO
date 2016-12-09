@@ -1,5 +1,3 @@
-Change clear_key to clear and except a list of keys to clear (like set).
-
 Add an add endpoint for adding additional items to a key (requires a dictionary to be the current value or null at the key).
 
 Figure out how to clear_all from rocksdb

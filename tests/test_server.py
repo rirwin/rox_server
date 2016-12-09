@@ -50,8 +50,10 @@ class TestServerRouteBehavior(object):
         response = client.get('set?blah')
         assert response.status_code == 400
 
-    def test_clear_key_clears_key_in_db(self, client):
+    def test_clear_clears_keys_in_db(self, client):
         db.put(b'5', b'1')
-        response = client.get('clear_key', data=simplejson.dumps(b'5'), content_type='application/json')
+        db.put(b'7', b'2')
+        response = client.get('clear', data=simplejson.dumps([b'5', b'7']), content_type='application/json')
         assert response.status_code == 200
         assert db.get(b'5') == None
+        assert db.get(b'7') == None
