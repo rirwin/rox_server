@@ -57,3 +57,7 @@ class TestServerRouteBehavior(object):
         assert response.status_code == 200
         assert db.get(b'5') is None
         assert db.get(b'7') is None
+
+    def test_clear_with_no_key_returns_bad_request(self, client):
+        response = client.get('clear?')
+        assert response.status_code == 400
