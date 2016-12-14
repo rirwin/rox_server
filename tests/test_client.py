@@ -80,7 +80,7 @@ class TestClient(object):
         mock_conn = mock.Mock()
         mock_response = mock.Mock()
         mock_decode = mock.Mock()
-        mock_decode.decode = mock.Mock(return_value=value)
+        mock_decode.decode = mock.Mock(return_value=simplejson.dumps({key: value}))
         mock_response.read = mock.Mock(return_value=mock_decode)
         mock_conn.getresponse = mock.Mock(return_value=mock_response)
         with mock.patch.object(client, 'conn', mock_conn) as patch_conn:
@@ -89,12 +89,33 @@ class TestClient(object):
                 mock.call(
                     'GET',
                     '/get',
-                    simplejson.dumps(key),
+                    simplejson.dumps([key]),
                     JSON_HEADERS
                 )
             ]
             assert patch_conn.request.call_args_list == expected_call_args
-            assert returned_value == value
+            assert returned_value == {key: value}
+
+    def test_get_bulk_get_endpoint_properly(self, client):
+        data = {'a': 'b', 'c': 'd'}
+        mock_conn = mock.Mock()
+        mock_response = mock.Mock()
+        mock_decode = mock.Mock()
+        mock_decode.decode = mock.Mock(return_value=simplejson.dumps(data))
+        mock_response.read = mock.Mock(return_value=mock_decode)
+        mock_conn.getresponse = mock.Mock(return_value=mock_response)
+        with mock.patch.object(client, 'conn', mock_conn) as patch_conn:
+            returned_value = client.get_bulk(list(data.keys()))
+            expected_call_args = [
+                mock.call(
+                    'GET',
+                    '/get',
+                    simplejson.dumps(list(data.keys())),
+                    JSON_HEADERS
+                )
+            ]
+            assert patch_conn.request.call_args_list == expected_call_args
+            assert returned_value == data
 
     def test_flush_calls_set_bulk_with_cache(self, client):
         cache = {'a': 'b'}
