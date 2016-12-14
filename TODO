@@ -1,3 +1,5 @@
+Unit tests in docker for testing rocksdb orm
+
 Add an add endpoint for adding additional items to a key (requires a dictionary to be the current value or null at the key).
 
 Figure out how to clear_all from rocksdb

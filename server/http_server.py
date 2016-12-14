@@ -1,15 +1,8 @@
 from flask import Flask
 from flask import request
+import simplejson
 
-
-try:
-    import rocksdb
-    db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))  # pragma: no cover
-    print("Using RocksDB")                                                            # pragma: no cover
-except ImportError:
-    from server.dict_database import DictDatabase
-    db = DictDatabase()
-    print("Using In-Memory Dictionary")
+from database.db import db
 
 
 app = Flask(__name__)
@@ -32,8 +25,9 @@ def index():
 def set():
     try:
         data = request.get_json()
-        for k, v in data.items():
-            db.put(str.encode(k), str.encode(v))
+        if not data:
+            raise Exception
+        db.put(data)
     except:
         return BAD_REQUEST, 400
     return OK, 200
@@ -42,24 +36,23 @@ def set():
 @app.route('/get', methods=['GET', 'POST'])
 def get():
     try:
-        key = request.get_json()
-        encoded_key = str.encode(key)
+        keys = request.get_json()
+        if not keys:
+            raise Exception
+        data = db.get(keys)
     except:
         return BAD_REQUEST, 400
 
-    value = db.get(encoded_key)
-    if value:
-        return value, 200
-    return KEY_NOT_FOUND, 404
+    return simplejson.dumps(data), 200
 
 
 @app.route('/clear', methods=['GET', 'POST'])
 def clear():
     try:
         keys = request.get_json()
-        for key in keys:
-            encoded_key = str.encode(key)
-            db.delete(encoded_key)
+        if not keys:
+            raise Exception
+        db.delete(keys)
         return OK, 200
     except:
         return BAD_REQUEST, 400
