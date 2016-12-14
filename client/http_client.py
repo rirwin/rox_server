@@ -44,11 +44,23 @@ class RoxHttpClient(object):
         self.conn.request(
             'GET',
             '/get',
-            simplejson.dumps(key),
+            simplejson.dumps([key]),
             JSON_HEADERS
         )
         resp = self.conn.getresponse()
-        return resp.read().decode()
+        data = resp.read().decode()
+        return simplejson.loads(data)
+
+    def get_bulk(self, keys):
+        self.conn.request(
+            'GET',
+            '/get',
+            simplejson.dumps(keys),
+            JSON_HEADERS
+        )
+        resp = self.conn.getresponse()
+        data = resp.read().decode()
+        return simplejson.loads(data)
 
     def flush(self):
         return self.set_bulk(self._cache)

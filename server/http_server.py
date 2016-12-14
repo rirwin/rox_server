@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request
+import simplejson
 
 from database.db import db
 
@@ -35,16 +36,14 @@ def set():
 @app.route('/get', methods=['GET', 'POST'])
 def get():
     try:
-        key = request.get_json()
-        if not key:
+        keys = request.get_json()
+        if not keys:
             raise Exception
-        value = db.get(key)
+        data = db.get(keys)
     except:
         return BAD_REQUEST, 400
 
-    if value:
-        return value, 200
-    return KEY_NOT_FOUND, 404
+    return simplejson.dumps(data), 200
 
 
 @app.route('/clear', methods=['GET', 'POST'])
