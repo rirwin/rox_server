@@ -14,10 +14,10 @@ class RocksDB(object):
             batch.put(str.encode(key), str.encode(value))
         self._db.write(batch)
 
-    def get(self, key):
-        value = self._db.get(str.encode(key))
-        if value:
-            return value.decode()
+    def get(self, keys):
+        data = self._db.multi_get([str.encode(key) for key in keys])
+        if data:
+            return {k.decode(): v.decode() for k, v in data.items() if v is not None}
 
     def delete(self, keys):
         batch = rocksdb.WriteBatch()

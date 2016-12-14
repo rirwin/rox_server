@@ -21,10 +21,11 @@ class TestServerRouteBehavior(object):
         assert b'Welcome to KV server.' in response.get_data()
 
     def test_get_retrieves_object_from_db(self, client):
-        with mock.patch.object(db, 'get', return_value={'5':'1', 'a': 'b'}):
+        data = {'5': '1', 'a': 'b'}
+        with mock.patch.object(db, 'get', return_value=data):
             response = client.get('get', data=simplejson.dumps(['5', 'a']), content_type='application/json')
             assert response.status_code == 200
-            assert response.data == simplejson.dumps({'5':'1', 'a': 'b'}).encode()
+            assert response.data == simplejson.dumps(data).encode()
 
     def test_get_with_no_key_returns_bad_request(self, client):
         response = client.get('get?')
