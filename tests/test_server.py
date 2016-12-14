@@ -21,19 +21,19 @@ class TestServerRouteBehavior(object):
         assert b'Welcome to KV server.' in response.get_data()
 
     def test_get_retrieves_object_from_db(self, client):
-        with mock.patch.object(db, 'get', return_value='1'):
-            response = client.get('get', data=simplejson.dumps('5'), content_type='application/json')
+        with mock.patch.object(db, 'get', return_value={'5':'1', 'a': 'b'}):
+            response = client.get('get', data=simplejson.dumps(['5', 'a']), content_type='application/json')
             assert response.status_code == 200
-            assert response.data == b'1'
+            assert response.data == simplejson.dumps({'5':'1', 'a': 'b'}).encode()
 
     def test_get_with_no_key_returns_bad_request(self, client):
         response = client.get('get?')
         assert response.status_code == 400
 
-    def test_get_with_no_value_in_db_returns_not_found(self, client):
-        with mock.patch.object(db, 'get', return_value=None):
-            response = client.get('get', data=simplejson.dumps('abcd'), content_type='application/json')
-            assert response.status_code == 404
+    def test_get_with_no_value_in_db_returns_empty_dict(self, client):
+        with mock.patch.object(db, 'get', return_value={}):
+            response = client.get('get', data=simplejson.dumps(['abcd']), content_type='application/json')
+            assert response.data == b'{}'
 
     def test_set_calls_put_to_db(self, client):
         data = {'key_0': 'value_0', 'key_1': 'value_1'}
