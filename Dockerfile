@@ -23,9 +23,9 @@ RUN     apt-get update && \
             # rocksdb dependencies
             libbz2-dev \
             libffi-dev \
-            libgflags-dev 
+            libgflags-dev \
             libsnappy-dev \
-            zlib1g-dev \
+            zlib1g-dev
             
 RUN mkdir /src
 
