@@ -1,9 +1,9 @@
 FROM ubuntu:16.04
 
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y wget language-pack-en-base
+#RUN apt-get install -y wget language-pack-en-base
 
-RUN locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales
+#RUN locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales
 
 RUN     apt-get update && \
         DEBIAN_FRONTEND=noninteractive apt-get install \
@@ -12,8 +12,6 @@ RUN     apt-get update && \
             libpq5 \
             libpq-dev \
             uuid-dev \
-            libsnappy-dev \
-            libffi-dev \
             python-pip \
             python-pkg-resources \
             python-setuptools \
@@ -21,10 +19,13 @@ RUN     apt-get update && \
             tox \
             sudo \
             vim \
+            wget \
             # rocksdb dependencies
-            zlib1g-dev \
             libbz2-dev \
+            libffi-dev \
             libgflags-dev 
+            libsnappy-dev \
+            zlib1g-dev \
             
 RUN mkdir /src
 
