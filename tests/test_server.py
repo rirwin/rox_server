@@ -38,10 +38,10 @@ class TestServerRouteBehavior(object):
 
     def test_set_calls_put_to_db(self, client):
         data = {'key_0': 'value_0', 'key_1': 'value_1'}
-        with mock.patch.object(db, 'put') as patch_put:
+        with mock.patch.object(db, 'set') as patch_set:
             response = client.get('set', data=simplejson.dumps(data), content_type='application/json')
             assert response.status_code == 200
-            assert patch_put.call_args_list == [mock.call(data)]
+            assert patch_set.call_args_list == [mock.call(data)]
 
     def test_set_not_json_returns_bad_request(self, client):
         response = client.get('set?blah')

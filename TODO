@@ -1,5 +1,8 @@
-Unit tests in docker for testing rocksdb orm
+all values (incl. nested) should be possibly ints
+
+blocked - Unit tests in docker for testing rocksdb orm
 
 Add an add endpoint for adding additional items to a key (requires a dictionary to be the current value or null at the key).
+Add itest for add_to_row functionality, currently not tested, WIP
 
 Figure out how to clear_all from rocksdb

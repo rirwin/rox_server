@@ -21,13 +21,24 @@ def index():
     return INSTRUCTIONS, 200
 
 
+@app.route('/add', methods=['GET', 'POST'])
+def add():
+    try:
+        data = request.get_json()
+        if not data:
+            raise Exception
+        db.add_to_row(data)
+    except:
+        return BAD_REQUEST, 400
+    return OK, 200
+
 @app.route('/set', methods=['GET', 'POST'])
 def set():
     try:
         data = request.get_json()
         if not data:
             raise Exception
-        db.put(data)
+        db.set(data)
     except:
         return BAD_REQUEST, 400
     return OK, 200
