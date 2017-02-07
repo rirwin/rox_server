@@ -32,6 +32,7 @@ def add():
         return BAD_REQUEST, 400
     return OK, 200
 
+
 @app.route('/set', methods=['GET', 'POST'])
 def set():
     try:

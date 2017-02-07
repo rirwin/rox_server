@@ -9,7 +9,7 @@ class RocksDB(object):
     def __init__(self):
         self._db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))  # pragma: no cover
 
-    def add_to_row(self, row, data): # make sure no key already there?
+    def add_to_row(self, row, data):  # make sure no key already there?
         batch = rocksdb.WriteBatch()
         for key, value in data.items():
             batch.put(str.encode(row + '.' + key), str.encode(value))
