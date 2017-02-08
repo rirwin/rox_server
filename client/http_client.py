@@ -40,6 +40,15 @@ class RoxHttpClient(object):
             self.set_bulk(self._cache)
             self._cache = {}
 
+    def add(self, key, data):
+        self.conn.request(
+            'POST',
+            '/add',
+            simplejson.dumps({key: data}),
+            JSON_HEADERS
+        )
+        self.conn.getresponse()
+
     def get(self, key):
         self.conn.request(
             'GET',

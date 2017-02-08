@@ -6,3 +6,5 @@ Add an add endpoint for adding additional items to a key (requires a dictionary 
 Add itest for add_to_row functionality, currently not tested, WIP
 
 Figure out how to clear_all from rocksdb
+
+In the client, do something with response from server
