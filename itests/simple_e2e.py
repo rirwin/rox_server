@@ -41,3 +41,9 @@ for k, v in data_part_2.items():
 
 
 assert client.get_bulk(list(data_part_2.keys())) == data_part_2
+
+
+key = 'my_add_key'
+data = {'attr1': 'value1', 'attr2': 'value2'}
+client.add(key, data)
+assert client.get_rows([key])[key] == data

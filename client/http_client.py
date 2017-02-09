@@ -71,6 +71,17 @@ class RoxHttpClient(object):
         data = resp.read().decode()
         return simplejson.loads(data)
 
+    def get_rows(self, rows):
+        self.conn.request(
+            'GET',
+            '/get_rows',
+            simplejson.dumps(rows),
+            JSON_HEADERS
+        )
+        resp = self.conn.getresponse()
+        data = resp.read().decode()
+        return simplejson.loads(data)
+
     def flush(self):
         return self.set_bulk(self._cache)
 

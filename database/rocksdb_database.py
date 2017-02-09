@@ -9,21 +9,23 @@ class RocksDB(object):
     def __init__(self):
         self._db = rocksdb.DB("rox_server_kernel.db", rocksdb.Options(create_if_missing=True))  # pragma: no cover
 
-    def add_to_row(self, row, data):  # make sure no key already there?
+    def add(self, data):
         batch = rocksdb.WriteBatch()
-        for key, value in data.items():
-            batch.put(str.encode(row + '.' + key), str.encode(value))
+        for row, row_data in data.items():
+            for key, value in row_data.items():
+                batch.put(str.encode(row + '.' + key), str.encode(value))
         self._db.write(batch)
 
-    def get_row(self, keys):
+    def get_rows(self, rows):
         it = self._db.iteritems()
         data = {}
-        for key in keys:
-            prefix = str.encode(key)
+        for row in rows:
+            print(row)
+            prefix = str.encode(row)
             it.seek(prefix)
-            row = dict(itertools.takewhile(lambda item: item[0].startswith(prefix), it))
-            row_data = {k[len(prefix) + 1:].decode(): v.decode() for k, v in row.items()}
-            data.update({key: row_data})
+            prefix_data = dict(itertools.takewhile(lambda item: item[0].startswith(prefix), it))
+            row_data = {k[len(prefix) + 1:].decode(): v.decode() for k, v in prefix_data.items()}
+            data.update({row: row_data})
         return data
 
     def set(self, data):
