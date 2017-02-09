@@ -12,6 +12,11 @@ class TestClient(object):
     def client(self):
         return RoxHttpClient()
 
+    @pytest.yield_fixture
+    def patch_conn(self, client):
+        with mock.patch.object(client, 'conn') as patched_conn:
+            yield patched_conn
+
     def test_client_init_opens_http_connection(self):
         client = RoxHttpClient(host='1.2.3.4', port=5000, cache_size_limit=50)
         assert client.conn.host == '1.2.3.4'
@@ -25,49 +30,60 @@ class TestClient(object):
             ('1.2.3.4', {'attr1': 1, 'attr2': True, 'attr3': 0.75})
         ]
     )
-    def test_set_calls_set_endpoint_properly(self, client, key, value):
-        with mock.patch.object(client, 'conn') as patch_conn:
-            client.set(key, value)
-            expected_call_args = [
-                mock.call(
-                    'POST',
-                    '/set',
-                    simplejson.dumps({key: value}),
-                    JSON_HEADERS
-                )
-            ]
-            assert patch_conn.request.call_args_list == expected_call_args
+    def test_set_calls_set_endpoint_properly(self, patch_conn, client, key, value):
+        client.set(key, value)
+        expected_call_args = [
+            mock.call(
+                'POST',
+                '/set',
+                simplejson.dumps({key: value}),
+                JSON_HEADERS
+            )
+        ]
+        assert patch_conn.request.call_args_list == expected_call_args
 
-    def test_set_bulk_calls_set_endpoint_properly(self, client):
+    def test_set_bulk_calls_set_endpoint_properly(self, patch_conn, client):
         data = {'key_{}'.format(i): 'value_{}'.format(i) for i in range(10)}
-        with mock.patch.object(client, 'conn') as patch_conn:
-            client.set_bulk(data)
-            expected_call_args = [
-                mock.call(
-                    'POST',
-                    '/set',
-                    simplejson.dumps(data),
-                    JSON_HEADERS
-                )
-            ]
-            assert patch_conn.request.call_args_list == expected_call_args
+        client.set_bulk(data)
+        expected_call_args = [
+            mock.call(
+                'POST',
+                '/set',
+                simplejson.dumps(data),
+                JSON_HEADERS
+            )
+        ]
+        assert patch_conn.request.call_args_list == expected_call_args
 
-    def test_set_cached_calls_set_bulk_endpoint_after_limit(self, client):
+    def test_set_cached_calls_set_bulk_endpoint_after_limit(self, patch_conn, client):
         data = [('key_{}'.format(i), 'value_{}'.format(i)) for i in range(10)]
-        with mock.patch.object(client, 'conn') as patch_conn:
-            for k, v in data:
-                client.set_cached(k, v)
+        for k, v in data:
+            client.set_cached(k, v)
 
-            expected_call_args = [
-                mock.call(
-                    'POST',
-                    '/set',
-                    simplejson.dumps({i[0]: i[1] for i in data[:client.cache_size_limit]}),
-                    JSON_HEADERS
-                )
-            ]
-            assert patch_conn.request.call_args_list == expected_call_args
-            assert client._cache == {i[0]: i[1] for i in data[client.cache_size_limit:]}
+        expected_call_args = [
+            mock.call(
+                'POST',
+                '/set',
+                simplejson.dumps({i[0]: i[1] for i in data[:client.cache_size_limit]}),
+                JSON_HEADERS
+            )
+        ]
+        assert patch_conn.request.call_args_list == expected_call_args
+        assert client._cache == {i[0]: i[1] for i in data[client.cache_size_limit:]}
+
+    def test_add_calls_add_endpoint_properly(self, patch_conn, client):
+        row_key = 'row_key_0'
+        data = {'key_0': 'value_0', 'key_1': 'value_1'}
+        client.add(row_key, data)
+        expected_call_args = [
+            mock.call(
+                'POST',
+                '/add',
+                simplejson.dumps({row_key: data}),
+                JSON_HEADERS
+            )
+        ]
+        assert patch_conn.request.call_args_list == expected_call_args
 
     @pytest.mark.parametrize(
         'key, value',
@@ -124,30 +140,28 @@ class TestClient(object):
             client.flush()
             assert patch_set_bulk.call_args_list == [mock.call(cache)]
 
-    def test_clear_calls_clear_endpoint_properly(self, client):
+    def test_clear_calls_clear_endpoint_properly(self, patch_conn, client):
         key = 'key1'
-        with mock.patch.object(client, 'conn') as patch_conn:
-            client.clear(key)
-            expected_call_args = [
-                mock.call(
-                    'POST',
-                    '/clear',
-                    simplejson.dumps([key]),
-                    JSON_HEADERS
-                )
-            ]
-            assert patch_conn.request.call_args_list == expected_call_args
+        client.clear(key)
+        expected_call_args = [
+            mock.call(
+                'POST',
+                '/clear',
+                simplejson.dumps([key]),
+                JSON_HEADERS
+            )
+        ]
+        assert patch_conn.request.call_args_list == expected_call_args
 
-    def test_clear_bulk_calls_clear_endpoint_properly(self, client):
+    def test_clear_bulk_calls_clear_endpoint_properly(self, patch_conn, client):
         keys = ['key1', 'key2']
-        with mock.patch.object(client, 'conn') as patch_conn:
-            client.clear_bulk(keys)
-            expected_call_args = [
-                mock.call(
-                    'POST',
-                    '/clear',
-                    simplejson.dumps(keys),
-                    JSON_HEADERS
-                )
-            ]
-            assert patch_conn.request.call_args_list == expected_call_args
+        client.clear_bulk(keys)
+        expected_call_args = [
+            mock.call(
+                'POST',
+                '/clear',
+                simplejson.dumps(keys),
+                JSON_HEADERS
+            )
+        ]
+        assert patch_conn.request.call_args_list == expected_call_args

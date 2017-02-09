@@ -27,7 +27,7 @@ def add():
         data = request.get_json()
         if not data:
             raise Exception
-        db.add_to_row(data)
+        db.add(data)
     except:
         return BAD_REQUEST, 400
     return OK, 200
@@ -52,6 +52,20 @@ def get():
         if not keys:
             raise Exception
         data = db.get(keys)
+    except:
+        return BAD_REQUEST, 400
+
+    return simplejson.dumps(data), 200
+
+
+@app.route('/get_rows', methods=['GET', 'POST'])
+def get_rows():
+    try:
+        rows = request.get_json()
+        if not rows:
+            raise Exception
+        data = db.get_rows(rows)
+
     except:
         return BAD_REQUEST, 400
 

@@ -47,6 +47,13 @@ class TestServerRouteBehavior(object):
         response = client.get('set?blah')
         assert response.status_code == 400
 
+    def test_add_calls_add_to_db(self, client):
+        data = {'row_key_0': {'key_0': 'value_0', 'key_1': 'value_1'}}
+        with mock.patch.object(db, 'add') as patch_add_to_row:
+            response = client.get('add', data=simplejson.dumps(data), content_type='application/json')
+            assert response.status_code == 200
+            assert patch_add_to_row.call_args_list == [mock.call(data)]
+
     def test_clear_calls_delete_in_db(self, client):
         keys = ['key_1', 'key_5']
         with mock.patch.object(db, 'delete') as patch_delete:
